@@ -1,34 +1,29 @@
+# main.py
 from fastapi import FastAPI
 from pydantic import BaseModel
-from typing import Optional
+from scorer import calculate_score
 
 app = FastAPI()
 
-# This defines what your API expects to receive
-class FlatRequest(BaseModel):
+class FlatData(BaseModel):
     address: str
     surface: float
-    rooms: Optional[int] = None
+    rooms: int
 
 @app.get("/")
 def home():
-    return {"message": "Flat Price Scorer is Online"}
+    return {"message": "This is a Flat Price Scorer"}
 
 @app.post("/score")
-def score_flat(flat: FlatRequest):
-    # ML Logic Placeholder
-    # In MLOps, you'd load a model here: model.predict([[surface, rooms]])
-    price_per_meter = 5000
-    estimated_price = flat.surface * price_per_meter
+def get_score(data: FlatData):
+    # Calling the function by passing parameters of surface and rooms.
+    estimated_price = calculate_score(data.surface, data.rooms)
     
-    if flat.rooms:
-        estimated_price += (flat.rooms * 10000)
-        
     return {
-        "address": flat.address,
+        "address": data.address,
         "estimated_price": estimated_price,
         "features_used": {
-            "surface": flat.surface,
-            "rooms": flat.rooms
+            "surface": data.surface,
+            "rooms": data.rooms
         }
     }
