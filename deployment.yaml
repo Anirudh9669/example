@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scorer-deployment
+spec:
+  replicas: 2 # This satisfies your "2 instances" requirement automatically
+  selector:
+    matchLabels:
+      app: scorer
+  template:
+    metadata:
+      labels:
+        app: scorer
+    spec:
+      containers:
+      - name: scorer-container
+        image: flat-scorer:v1
+        imagePullPolicy: Never # Tells K8s to use the image you just built locally
+        ports:
+        - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scorer-service
+spec:
+  type: NodePort
+  selector:
+    app: scorer
+  ports:
+    - port: 80
+      targetPort: 8000
+      nodePort: 30001 # You will access the app via localhost:30001
